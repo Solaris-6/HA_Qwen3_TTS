@@ -3,8 +3,7 @@
 import io
 import logging
 import os
-import wave
-from typing import Any, Final
+from typing import Any
 
 import numpy as np
 import torch
@@ -20,68 +19,18 @@ from .const import (
     CONF_MODEL_PATH,
     CONF_VOICE,
     DEFAULT_LANGUAGE,
-    DEFAULT_MODEL_PATH,   # <-- AGGIUNTO
+    DEFAULT_MODEL_PATH,
     DEFAULT_VOICE,
     DOMAIN,
     SAMPLE_RATE,
     SUPPORTED_LANGUAGES,
 )
 
-_LOGGER: Final = logging.getLogger(__name__)
+_LOGGER: logging.Logger = logging.getLogger(__name__)
 
 _model: Any = None
 _processor: Any = None
 _model_loaded: bool = False
-
-
-async def async_setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    async_add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
-) -> None:
-    """Set up the Qwen3-TTS platform (legacy YAML setup)."""
-    model_path = config.get(CONF_MODEL_PATH, DEFAULT_MODEL_PATH)
-    voice = config.get(CONF_VOICE, DEFAULT_VOICE)
-    language = config.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
-
-    _async_setup_provider(hass, model_path, voice, language, async_add_entities)
-
-
-async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up Qwen3-TTS from a config entry."""
-    model_path = entry.data.get(CONF_MODEL_PATH, DEFAULT_MODEL_PATH)
-    voice = entry.data.get(CONF_VOICE, DEFAULT_VOICE)
-    language = entry.data.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
-
-    _async_setup_provider(hass, model_path, voice, language, async_add_entities)
-
-
-def _async_setup_provider(
-    hass: HomeAssistant,
-    model_path: str,
-    voice: str,
-    language: str,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Qwen3-TTS provider."""
-    if model_path and not os.path.exists(model_path):
-        _LOGGER.error(
-            "Il percorso del modello Qwen3-TTS non esiste: %s", model_path
-        )
-        return
-
-    try:
-        _load_model(model_path)
-    except Exception:
-        _LOGGER.exception("Impossibile caricare il modello Qwen3-TTS")
-        return
-
-    async_add_entities([Qwen3TTSProvider(hass, model_path, voice, language)])
 
 
 def _load_model(model_path: str) -> tuple[Any, Any]:
@@ -125,9 +74,8 @@ def _synthesize_audio(
 ) -> bytes:
     """Sintetizza audio da testo usando Qwen3-TTS."""
     try:
-        tts_text = f"{text}"
         inputs = processor(
-            text=tts_text,
+            text=text,
             language=language,
             return_tensors="pt",
         )
@@ -180,7 +128,7 @@ class Qwen3TTSProvider(Provider):
         self._attr_name = "Qwen3-TTS"
         self._attr_unique_id = "qwen3_tts"
         self._default_voice = voice
-        self._default_language = language  # <-- attributo privato
+        self._default_language = language
 
     @property
     def supported_languages(self) -> list[str]:
@@ -237,3 +185,13 @@ class Qwen3TTSProvider(Provider):
         except Exception:
             _LOGGER.exception("Errore durante la generazione TTS Qwen3-TTS")
             return None, None
+
+    def async_process(self, message: str) -> TtsAudioType:
+        """Process a text message and return TTS audio."""
+        return self.get_tts_audio(message, "it", {})
+
+    async def async_process_async(self, message: str) -> TtsAudioType:
+        """Process a text message asynchronously and return TTS audio."""
+        return await asyncio.to_thread(
+            self.get_tts_audio, message, "it", {}
+        )
