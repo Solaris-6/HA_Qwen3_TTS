@@ -10,19 +10,12 @@ transformers>=4.57.3,<5.0.0  # Hugging Face Transformers for Qwen3-TTS
 torch>=2.9.0,<3.0.0          # PyTorch framework (CPU/GPU support)
 safetensors>=0.5.3,<1.0.0    # Safe tensor format for model weights
 
-# Audio processing
+# Audio processing - simplified dependencies
 numpy>=1.26.0,<2.0.0         # Numerical computing for audio arrays
-scipy>=1.14.0,<2.0.0         # Signal processing utilities
-soundfile>=0.12.1,<1.0.0     # WAV file I/O operations
 
-# Text processing and tokenization
-sentencepiece>=0.2.1,<0.3.0  # Tokenizer for Qwen models
+# Text processing and tokenization - optional but recommended
+sentencepiece>=0.2.1,<0.3.0  # Tokenizer for Qwen models (optional)
 protobuf>=5.29.2,<6.0.0      # Protocol buffers for model serialization
-
-# GPU support (optional - uncomment if using CUDA)
-# nvidia-cublas-cu12==12.8.4
-# nvidia-cudnn-cu12==9.7.0
-# triton>=3.0.0,<4.0.0       # For AMD/Intel GPU support
 
 # Utilities and type hints
 typing_extensions>=4.9.0,<5.0.0  # Type hints for Python 3.11+
