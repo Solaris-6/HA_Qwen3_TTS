@@ -1,7 +1,29 @@
-# Qwen3-TTS Requirements
-transformers>=4.57.3
-torch>=2.9.0
-numpy>=1.26.0
-safetensors>=0.5.3
-sentencepiece>=0.2.1
-protobuf>=5.29.2
+# Qwen3-TTS Integration - Requirements
+# Home Assistant 2024.11+ compatible
+
+# Core dependencies (provided by Home Assistant)
+aiohttp>=3.9.5,<4.0.0
+voluptuous>=0.14.2,<0.15.0
+
+# Machine Learning / Deep Learning
+transformers>=4.57.3,<5.0.0  # Hugging Face Transformers for Qwen3-TTS
+torch>=2.9.0,<3.0.0          # PyTorch framework (CPU/GPU support)
+safetensors>=0.5.3,<1.0.0    # Safe tensor format for model weights
+
+# Audio processing
+numpy>=1.26.0,<2.0.0         # Numerical computing for audio arrays
+scipy>=1.14.0,<2.0.0         # Signal processing utilities
+soundfile>=0.12.1,<1.0.0     # WAV file I/O operations
+
+# Text processing and tokenization
+sentencepiece>=0.2.1,<0.3.0  # Tokenizer for Qwen models
+protobuf>=5.29.2,<6.0.0      # Protocol buffers for model serialization
+
+# GPU support (optional - uncomment if using CUDA)
+# nvidia-cublas-cu12==12.8.4
+# nvidia-cudnn-cu12==9.7.0
+# triton>=3.0.0,<4.0.0       # For AMD/Intel GPU support
+
+# Utilities and type hints
+typing_extensions>=4.9.0,<5.0.0  # Type hints for Python 3.11+
+packaging>=24.0,<25.0             # Version comparison utilities
