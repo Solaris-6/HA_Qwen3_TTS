@@ -3,7 +3,7 @@
   "render_readme": true,
   "domains": ["sensor"],
   "zip_release": false,
-  "homeassistant": "2025.9.0",
+  "homeassistant": "2025.11.0",
   "iot_class": "local_polling",
   "version": "0.1.0"
 }
