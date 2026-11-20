@@ -1,7 +1,9 @@
 {
   "name": "Qwen3 TTS",
-  "content_in_root": false,
-  "homeassistant": "2025.1.0",
   "render_readme": true,
-  "filename": "README.md"
+  "domains": ["sensor"],
+  "zip_release": false,
+  "homeassistant": "2025.9.0",
+  "iot_class": "local_polling",
+  "version": "0.1.0"
 }
