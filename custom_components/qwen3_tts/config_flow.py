@@ -10,6 +10,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.config_entries import ConfigFlow
 
 from .const import (
     CONF_LANGUAGE,
@@ -25,7 +26,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class Qwen3TTSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class Qwen3TTSConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Qwen3-TTS."""
 
     VERSION = 1
@@ -70,8 +71,7 @@ class Qwen3TTSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    @staticmethod
-    def async_get_options_flow(config_entry):
+    def async_get_options_flow(self, config_entry):
         """Get the options flow for this handler."""
         return Qwen3TTSOptionsFlow()
 

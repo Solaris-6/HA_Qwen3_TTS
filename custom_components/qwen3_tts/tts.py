@@ -1,8 +1,10 @@
 """Support for the Qwen3-TTS text to speech service."""
 
+import asyncio
 import io
 import logging
 import os
+import wave
 from typing import Any
 
 import numpy as np
@@ -12,7 +14,6 @@ from homeassistant.components.tts import Provider, TtsAudioType
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from .const import (
     CONF_LANGUAGE,
@@ -93,9 +94,7 @@ def _synthesize_audio(
                 top_k=50,
             )
 
-        audio = processor.decode(outputs[0], skip_special_tokens=False)
-
-        audio_array = np.array(audio, dtype=np.float32)
+        audio_array = outputs[0].cpu().numpy().astype(np.float32)
         audio_array = (audio_array * 32767).astype(np.int16)
 
         buffer = io.BytesIO()
@@ -153,13 +152,13 @@ class Qwen3TTSProvider(Provider):
         """Return a list of supported options."""
         return [CONF_VOICE, CONF_LANGUAGE]
 
-    def get_tts_audio(
+    async def async_get_tts_audio(
         self,
         message: str,
         language: str,
         options: dict[str, Any],
     ) -> TtsAudioType:
-        """Request TTS file from Qwen3-TTS."""
+        """Request TTS file from Qwen3-TTS (async wrapper)."""
         voice = options.get(CONF_VOICE, self._default_voice)
         lang = options.get(CONF_LANGUAGE, self._default_language)
 
@@ -170,13 +169,12 @@ class Qwen3TTSProvider(Provider):
         _LOGGER.debug("Richiesta TTS per testo: %s", message)
 
         try:
-            model, processor = _load_model(self.model_path)
-            audio_data = _synthesize_audio(
-                model=model,
-                processor=processor,
-                text=message,
-                language=lang,
-                voice=voice,
+            audio_data = await self.hass.async_add_executor_job(
+                _synthesize_audio_sync,
+                self.model_path,
+                message,
+                lang,
+                voice,
             )
 
             _LOGGER.debug("Risposta TTS ricevuta per: %s", message)
@@ -186,12 +184,23 @@ class Qwen3TTSProvider(Provider):
             _LOGGER.exception("Errore durante la generazione TTS Qwen3-TTS")
             return None, None
 
-    def async_process(self, message: str) -> TtsAudioType:
+    async def async_process(self, message: str) -> TtsAudioType:
         """Process a text message and return TTS audio."""
-        return self.get_tts_audio(message, "it", {})
+        return await self.async_get_tts_audio(message, self._default_language, {})
 
     async def async_process_async(self, message: str) -> TtsAudioType:
         """Process a text message asynchronously and return TTS audio."""
         return await asyncio.to_thread(
-            self.get_tts_audio, message, "it", {}
+            self.async_get_tts_audio, message, self._default_language, {}
         )
+
+
+def _synthesize_audio_sync(
+    model_path: str,
+    text: str,
+    language: str,
+    voice: str,
+) -> bytes:
+    """Wrapper sincrono per la sintesi audio (eseguito in executor)."""
+    model, processor = _load_model(model_path)
+    return _synthesize_audio(model, processor, text, language, voice)
