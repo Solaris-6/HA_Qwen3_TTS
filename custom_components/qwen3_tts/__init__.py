@@ -13,7 +13,7 @@ async def async_setup(hass, config):
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up Qwen3-TTS from a config entry."""
     model_path = config_entry.data.get("model_path")
-    voice = config_entry.data.get("voice", "default")
+    voice = config_entry.data.get("voice", "claudia")
     language = config_entry.data.get("language", "it")
 
     from .tts import Qwen3TTSProvider
