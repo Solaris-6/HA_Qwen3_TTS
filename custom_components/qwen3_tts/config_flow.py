@@ -71,7 +71,7 @@ class Qwen3TTSConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    def async_get_options_flow(self, config_entry):
+    def async_get_options_flow(self):
         """Get the options flow for this handler."""
         return Qwen3TTSOptionsFlow()
 
