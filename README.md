@@ -47,6 +47,82 @@ Installazione manuale alternativa: copia la cartella `custom_components/qwen3_tt
 
 ### 2a. Avvia il server Qwen3-TTS (consigliato)
 
+#### La tua rete (Home Assistant su Raspberry Pi 5 a `192.168.1.114`, server su Raspberry Pi 4 a `192.168.1.139`)
+
+Il modello (`Qwen3-TTS-12Hz-0.6B-Base`) gira interamente sul **Raspberry Pi 4**: Home Assistant (sul Pi 5) non installa nulla di pesante e si limita a inviare il testo. Il Pi 4 deve avere **almeno 4 GB di RAM** (8 GB consigliati); con 4 GB aggiungi una swap di 2 GB per non avere interruzioni.
+
+Sul Pi 4, da un terminale (SSH o schermo):
+
+```bash
+# 1) dipendenze di sistema
+sudo apt update
+sudo apt install -y python3-venv python3-dev build-essential \
+    libsndfile1 sox ffmpeg
+
+# 2) crea il venv
+mkdir -p ~/qwen3-tts && cd ~/qwen3-tts
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 3) dipendenze Python (torch CPU per aarch64)
+pip install --upgrade pip
+pip install -r /percorso/del/repo/server/requirements.txt \
+    --extra-index-url https://download.pytorch.org/whl/cpu
+
+# 4) scarica il modello (~2,5 GB) sul Pi 4
+pip install -U "huggingface_hub[cli]"
+hf download Qwen/Qwen3-TTS-12Hz-0.6B-Base \
+    --local-dir ~/qwen3-tts/models/Qwen3-TTS-12Hz-0.6B-Base
+
+# 5) avvia il server (resta in primo piano)
+python -u /percorso/del/repo/server/qwen3_tts_server.py \
+    --model ~/qwen3-tts/models/Qwen3-TTS-12Hz-0.6B-Base \
+    --preload
+```
+
+Per farlo ripartire automaticamente dopo un riavvio del Pi 4, crea `/etc/systemd/system/qwen3-tts.service`:
+
+```ini
+[Unit]
+Description=Qwen3-TTS server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/qwen3-tts
+ExecStart=/home/pi/qwen3-tts/.venv/bin/python -u \
+    /home/pi/qwen3-tts/server/qwen3_tts_server.py \
+    --model /home/pi/qwen3-tts/models/Qwen3-TTS-12Hz-0.6B-Base \
+    --preload
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now qwen3-tts
+sudo systemctl status qwen3-tts
+journalctl -u qwen3-tts -f   # log in tempo reale
+```
+
+Verifica dal Pi 5 (o da qualsiasi PC della rete):
+
+```bash
+python tools/test_server.py --url http://192.168.1.139:8000
+```
+
+> ⚠️ Il Pi 4 è **solo CPU**: ogni frase di 10 parole richiede circa 60–180 s. Il caricamento del modello all'avvio richiede circa 60 s (anticipato da `--preload`).
+
+#### Installazione generica (PC / NAS / Mini PC)
+
+Sul computer che ospiterà il modello (es. `192.168.1.139`):"oldString">
+### 2a. Avvia il server Qwen3-TTS (consigliato)
+
 Sul computer che ospiterà il modello (es. `192.168.1.139`):
 
 ```bash
