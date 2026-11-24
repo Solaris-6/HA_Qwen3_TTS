@@ -1,0 +1,5 @@
+# Qwen3-TTS Integration - Requirements
+# Home Assistant installa automaticamente questi pacchetti dal manifest.json
+# al primo avvio dell'integrazione (pip install).
+
+qwen-tts==0.1.1

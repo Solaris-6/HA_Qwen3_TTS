@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configurar Qwen3-TTS",
+        "description": "Configura el modelo local Qwen3-TTS. El modelo ya debe estar descargado en Home Assistant, por ejemplo en `/config/models`.",
+        "data": {
+          "model_path": "Ruta del modelo",
+          "ref_audio": "Audio de referencia",
+          "ref_text": "Transcripción de referencia",
+          "language": "Idioma"
+        },
+        "data_description": {
+          "model_path": "Carpeta que contiene el modelo Qwen3-TTS descargado de Hugging Face.",
+          "ref_audio": "Ruta del archivo de cuya voz se clonará (WAV o MP3). Mantén el valor predeterminado para usar la voz incluida con la integración.",
+          "ref_text": "Transcripción exacta del audio de referencia. Si se rellena, el clonado de voz es notablemente más preciso.",
+          "language": "Idioma predeterminado usado para la síntesis de voz."
+        }
+      }
+    },
+    "error": {
+      "model_path_not_found": "La carpeta del modelo no existe.",
+      "model_incomplete": "La carpeta del modelo está incompleta. Descarga el repositorio completo de Hugging Face, incluida la carpeta speech_tokenizer y el archivo generation_config.json.",
+      "ref_audio_not_found": "El archivo de audio de referencia no existe."
+    },
+    "abort": {
+      "already_configured": "Qwen3-TTS ya está configurado."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opciones de Qwen3-TTS",
+        "description": "Los cambios se aplican en la próxima generación de voz.",
+        "data": {
+          "model_path": "Ruta del modelo",
+          "ref_audio": "Audio de referencia",
+          "ref_text": "Transcripción de referencia",
+          "language": "Idioma"
+        },
+        "data_description": {
+          "model_path": "Carpeta que contiene el modelo Qwen3-TTS descargado de Hugging Face.",
+          "ref_audio": "Ruta del archivo de cuya voz se clonará (WAV o MP3). Mantén el valor predeterminado para usar la voz incluida con la integración.",
+          "ref_text": "Transcripción exacta del audio de referencia. Si se rellena, el clonado de voz es notablemente más preciso.",
+          "language": "Idioma predeterminado usado para la síntesis de voz."
+        }
+      }
+    },
+    "error": {
+      "model_path_not_found": "La carpeta del modelo no existe.",
+      "model_incomplete": "La carpeta del modelo está incompleta. Descarga el repositorio completo de Hugging Face, incluida la carpeta speech_tokenizer y el archivo generation_config.json.",
+      "ref_audio_not_found": "El archivo de audio de referencia no existe."
+    }
+  }
+}

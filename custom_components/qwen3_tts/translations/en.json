@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Qwen3-TTS",
+        "description": "Set up the local Qwen3-TTS model. The model must already be downloaded into Home Assistant, for example in `/config/models`.",
+        "data": {
+          "model_path": "Model path",
+          "ref_audio": "Reference audio",
+          "ref_text": "Reference transcript",
+          "language": "Language"
+        },
+        "data_description": {
+          "model_path": "Folder containing the Qwen3-TTS model downloaded from Hugging Face.",
+          "ref_audio": "Path to the audio file whose voice will be cloned (WAV or MP3). Keep the default to use the voice shipped with the integration.",
+          "ref_text": "Exact transcript of the reference audio. When filled in, voice cloning is noticeably more accurate.",
+          "language": "Default language used for speech synthesis."
+        }
+      }
+    },
+    "error": {
+      "model_path_not_found": "The model folder does not exist.",
+      "model_incomplete": "The model folder is incomplete. Download the whole repository from Hugging Face, including the speech_tokenizer folder and generation_config.json.",
+      "ref_audio_not_found": "The reference audio file does not exist."
+    },
+    "abort": {
+      "already_configured": "Qwen3-TTS is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Qwen3-TTS options",
+        "description": "Changes are applied the next time speech is generated.",
+        "data": {
+          "model_path": "Model path",
+          "ref_audio": "Reference audio",
+          "ref_text": "Reference transcript",
+          "language": "Language"
+        },
+        "data_description": {
+          "model_path": "Folder containing the Qwen3-TTS model downloaded from Hugging Face.",
+          "ref_audio": "Path to the audio file whose voice will be cloned (WAV or MP3). Keep the default to use the voice shipped with the integration.",
+          "ref_text": "Exact transcript of the reference audio. When filled in, voice cloning is noticeably more accurate.",
+          "language": "Default language used for speech synthesis."
+        }
+      }
+    },
+    "error": {
+      "model_path_not_found": "The model folder does not exist.",
+      "model_incomplete": "The model folder is incomplete. Download the whole repository from Hugging Face, including the speech_tokenizer folder and generation_config.json.",
+      "ref_audio_not_found": "The reference audio file does not exist."
+    }
+  }
+}

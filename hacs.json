@@ -1,0 +1,6 @@
+{
+  "name": "Qwen3 TTS",
+  "render_readme": true,
+  "homeassistant": "2024.12.0",
+  "zip_release": false
+}

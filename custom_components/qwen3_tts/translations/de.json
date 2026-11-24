@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Qwen3-TTS konfigurieren",
+        "description": "Das lokale Qwen3-TTS-Modell einrichten. Das Modell muss bereits in Home Assistant heruntergeladen sein, zum Beispiel in `/config/models`.",
+        "data": {
+          "model_path": "Modellpfad",
+          "ref_audio": "Referenzaudio",
+          "ref_text": "Referenztranskript",
+          "language": "Sprache"
+        },
+        "data_description": {
+          "model_path": "Ordner mit dem von Hugging Face heruntergeladenen Qwen3-TTS-Modell.",
+          "ref_audio": "Pfad zur Audiodatei, deren Stimme geklont werden soll (WAV oder MP3). Den Standard beibehalten, um die mit der Integration mitgelieferte Stimme zu verwenden.",
+          "ref_text": "Genauer Wortlaut des Referenzaudios. Wenn angegeben, ist die Stimmklonung deutlich genauer.",
+          "language": "Standard-Sprache für die Sprachausgabe."
+        }
+      }
+    },
+    "error": {
+      "model_path_not_found": "Der Modellordner existiert nicht.",
+      "model_incomplete": "Der Modellordner ist unvollständig. Lade das gesamte Repository von Hugging Face herunter, einschließlich des Ordners speech_tokenizer und der Datei generation_config.json.",
+      "ref_audio_not_found": "Die Referenz-Audiodatei existiert nicht."
+    },
+    "abort": {
+      "already_configured": "Qwen3-TTS ist bereits konfiguriert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Qwen3-TTS-Optionen",
+        "description": "Änderungen werden bei der nächsten Sprachgenerierung wirksam.",
+        "data": {
+          "model_path": "Modellpfad",
+          "ref_audio": "Referenzaudio",
+          "ref_text": "Referenztranskript",
+          "language": "Sprache"
+        },
+        "data_description": {
+          "model_path": "Ordner mit dem von Hugging Face heruntergeladenen Qwen3-TTS-Modell.",
+          "ref_audio": "Pfad zur Audiodatei, deren Stimme geklont werden soll (WAV oder MP3). Den Standard beibehalten, um die mit der Integration mitgelieferte Stimme zu verwenden.",
+          "ref_text": "Genauer Wortlaut des Referenzaudios. Wenn angegeben, ist die Stimmklonung deutlich genauer.",
+          "language": "Standard-Sprache für die Sprachausgabe."
+        }
+      }
+    },
+    "error": {
+      "model_path_not_found": "Der Modellordner existiert nicht.",
+      "model_incomplete": "Der Modellordner ist unvollständig. Lade das gesamte Repository von Hugging Face herunter, einschließlich des Ordners speech_tokenizer und der Datei generation_config.json.",
+      "ref_audio_not_found": "Die Referenz-Audiodatei existiert nicht."
+    }
+  }
+}

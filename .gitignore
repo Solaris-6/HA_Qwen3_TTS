@@ -1,0 +1,16 @@
+# Git ignore for Qwen3-TTS Project
+*.pyc
+__pycache__/
+*.env
+.config/
+/config/
+*.lg3
+*.pyc
+__pycache__/
+*.db
+*.sqlite3
+.env*
+secrets/
+.idea/
+tools/output/
+/__init__.py

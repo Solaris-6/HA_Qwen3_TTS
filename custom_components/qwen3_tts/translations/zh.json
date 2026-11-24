@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "配置 Qwen3-TTS",
+        "description": "设置本地 Qwen3-TTS 模型。模型需要已下载到 Home Assistant 中，例如放在 `/config/models`。",
+        "data": {
+          "model_path": "模型路径",
+          "ref_audio": "参考音频",
+          "ref_text": "参考文本",
+          "language": "语言"
+        },
+        "data_description": {
+          "model_path": "从 Hugging Face 下载的 Qwen3-TTS 模型所在文件夹。",
+          "ref_audio": "要克隆声音的音频文件路径（WAV 或 MP3）。保持默认值即可使用集成自带的声音。",
+          "ref_text": "参考音频的准确文字内容。填写后声音克隆会明显更准确。",
+          "language": "语音合成使用的默认语言。"
+        }
+      }
+    },
+    "error": {
+      "model_path_not_found": "模型文件夹不存在。",
+      "model_incomplete": "模型文件夹不完整。请从 Hugging Face 下载完整的仓库，包括 speech_tokenizer 文件夹和 generation_config.json。",
+      "ref_audio_not_found": "参考音频文件不存在。"
+    },
+    "abort": {
+      "already_configured": "Qwen3-TTS 已经配置过了。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Qwen3-TTS 选项",
+        "description": "更改将在下次生成语音时生效。",
+        "data": {
+          "model_path": "模型路径",
+          "ref_audio": "参考音频",
+          "ref_text": "参考文本",
+          "language": "语言"
+        },
+        "data_description": {
+          "model_path": "从 Hugging Face 下载的 Qwen3-TTS 模型所在文件夹。",
+          "ref_audio": "要克隆声音的音频文件路径（WAV 或 MP3）。保持默认值即可使用集成自带的声音。",
+          "ref_text": "参考音频的准确文字内容。填写后声音克隆会明显更准确。",
+          "language": "语音合成使用的默认语言。"
+        }
+      }
+    },
+    "error": {
+      "model_path_not_found": "模型文件夹不存在。",
+      "model_incomplete": "模型文件夹不完整。请从 Hugging Face 下载完整的仓库，包括 speech_tokenizer 文件夹和 generation_config.json。",
+      "ref_audio_not_found": "参考音频文件不存在。"
+    }
+  }
+}

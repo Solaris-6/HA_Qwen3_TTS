@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configurer Qwen3-TTS",
+        "description": "Configurez le modèle local Qwen3-TTS. Le modèle doit déjà être téléchargé dans Home Assistant, par exemple dans `/config/models`.",
+        "data": {
+          "model_path": "Chemin du modèle",
+          "ref_audio": "Audio de référence",
+          "ref_text": "Transcription de référence",
+          "language": "Langue"
+        },
+        "data_description": {
+          "model_path": "Dossier contenant le modèle Qwen3-TTS téléchargé depuis Hugging Face.",
+          "ref_audio": "Chemin du fichier audio dont la voix sera clonée (WAV ou MP3). Conservez la valeur par défaut pour utiliser la voix fournie avec l'intégration.",
+          "ref_text": "Transcription exacte de l'audio de référence. Renseignée, elle rend le clonage de voix nettement plus précis.",
+          "language": "Langue par défaut utilisée pour la synthèse vocale."
+        }
+      }
+    },
+    "error": {
+      "model_path_not_found": "Le dossier du modèle n'existe pas.",
+      "model_incomplete": "Le dossier du modèle est incomplet. Téléchargez tout le dépôt depuis Hugging Face, y compris le dossier speech_tokenizer et le fichier generation_config.json.",
+      "ref_audio_not_found": "Le fichier audio de référence n'existe pas."
+    },
+    "abort": {
+      "already_configured": "Qwen3-TTS est déjà configuré."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options de Qwen3-TTS",
+        "description": "Les modifications s'appliquent à la prochaine génération de parole.",
+        "data": {
+          "model_path": "Chemin du modèle",
+          "ref_audio": "Audio de référence",
+          "ref_text": "Transcription de référence",
+          "language": "Langue"
+        },
+        "data_description": {
+          "model_path": "Dossier contenant le modèle Qwen3-TTS téléchargé depuis Hugging Face.",
+          "ref_audio": "Chemin du fichier audio dont la voix sera clonée (WAV ou MP3). Conservez la valeur par défaut pour utiliser la voix fournie avec l'intégration.",
+          "ref_text": "Transcription exacte de l'audio de référence. Renseignée, elle rend le clonage de voix nettement plus précis.",
+          "language": "Langue par défaut utilisée pour la synthèse vocale."
+        }
+      }
+    },
+    "error": {
+      "model_path_not_found": "Le dossier du modèle n'existe pas.",
+      "model_incomplete": "Le dossier du modèle est incomplet. Téléchargez tout le dépôt depuis Hugging Face, y compris le dossier speech_tokenizer et le fichier generation_config.json.",
+      "ref_audio_not_found": "Le fichier audio de référence n'existe pas."
+    }
+  }
+}
