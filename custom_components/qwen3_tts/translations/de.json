@@ -3,6 +3,30 @@
     "step": {
       "user": {
         "title": "Qwen3-TTS konfigurieren",
+        "description": "Wähle, wo das Modell läuft.\n\nGib die Adresse eines Qwen3-TTS-Servers in deinem Netzwerk ein oder lasse das Feld leer, um das Modell in Home Assistant laufen zu lassen.",
+        "data": {
+          "server_url": "Qwen3-TTS-Server"
+        },
+        "data_description": {
+          "server_url": "Adresse des Servers, gestartet mit `server/qwen3_tts_server.py`, z. B. `http://192.168.1.139:8000`. Leer lassen, um das Modell in Home Assistant laufen zu lassen (Home Assistant OS und Container können PyTorch nicht installieren)."
+        }
+      },
+      "server": {
+        "title": "Qwen3-TTS-Server",
+        "description": "Das Modell läuft auf dem Server: Home Assistant sendet nur den Text und empfängt das Audio. Stelle sicher, dass der Server läuft, bevor du fortfährst.",
+        "data": {
+          "ref_audio": "Referenzaudio",
+          "ref_text": "Referenztranskript",
+          "language": "Sprache"
+        },
+        "data_description": {
+          "ref_audio": "Pfad zur Audiodatei, deren Stimme geklont werden soll (WAV oder MP3). Den Standard beibehalten, um die mit der Integration mitgelieferte Stimme zu verwenden.",
+          "ref_text": "Genauer Wortlaut des Referenzaudios. Wenn angegeben, ist die Stimmklonung deutlich genauer.",
+          "language": "Standard-Sprache für die Sprachausgabe."
+        }
+      },
+      "local": {
+        "title": "Qwen3-TTS konfigurieren",
         "description": "Das lokale Qwen3-TTS-Modell einrichten. Das Modell muss bereits in Home Assistant heruntergeladen sein, zum Beispiel in `/config/models`.",
         "data": {
           "model_path": "Modellpfad",
@@ -21,7 +45,10 @@
     "error": {
       "model_path_not_found": "Der Modellordner existiert nicht.",
       "model_incomplete": "Der Modellordner ist unvollständig. Lade das gesamte Repository von Hugging Face herunter, einschließlich des Ordners speech_tokenizer und der Datei generation_config.json.",
-      "ref_audio_not_found": "Die Referenz-Audiodatei existiert nicht."
+      "ref_audio_not_found": "Die Referenz-Audiodatei existiert nicht.",
+      "cannot_connect": "Der Server unter dieser Adresse ist nicht erreichbar. Prüfe URL, Port und ob der Server läuft.",
+      "invalid_url": "Gib eine gültige Adresse ein, die mit http:// oder https:// beginnt, ohne Leerzeichen.",
+      "server_error": "Der Server antwortet, kann das Modell aber nicht laden. Prüfe das Server-Protokoll."
     },
     "abort": {
       "already_configured": "Qwen3-TTS ist bereits konfiguriert."
@@ -36,20 +63,25 @@
           "model_path": "Modellpfad",
           "ref_audio": "Referenzaudio",
           "ref_text": "Referenztranskript",
-          "language": "Sprache"
+          "language": "Sprache",
+          "server_url": "Qwen3-TTS-Server"
         },
         "data_description": {
           "model_path": "Ordner mit dem von Hugging Face heruntergeladenen Qwen3-TTS-Modell.",
           "ref_audio": "Pfad zur Audiodatei, deren Stimme geklont werden soll (WAV oder MP3). Den Standard beibehalten, um die mit der Integration mitgelieferte Stimme zu verwenden.",
           "ref_text": "Genauer Wortlaut des Referenzaudios. Wenn angegeben, ist die Stimmklonung deutlich genauer.",
-          "language": "Standard-Sprache für die Sprachausgabe."
+          "language": "Standard-Sprache für die Sprachausgabe.",
+          "server_url": "Adresse des Qwen3-TTS-Servers, z. B. `http://192.168.1.139:8000`."
         }
       }
     },
     "error": {
       "model_path_not_found": "Der Modellordner existiert nicht.",
       "model_incomplete": "Der Modellordner ist unvollständig. Lade das gesamte Repository von Hugging Face herunter, einschließlich des Ordners speech_tokenizer und der Datei generation_config.json.",
-      "ref_audio_not_found": "Die Referenz-Audiodatei existiert nicht."
+      "ref_audio_not_found": "Die Referenz-Audiodatei existiert nicht.",
+      "cannot_connect": "Der Server unter dieser Adresse ist nicht erreichbar. Prüfe URL, Port und ob der Server läuft.",
+      "invalid_url": "Gib eine gültige Adresse ein, die mit http:// oder https:// beginnt, ohne Leerzeichen.",
+      "server_error": "Der Server antwortet, kann das Modell aber nicht laden. Prüfe das Server-Protokoll."
     }
   }
 }

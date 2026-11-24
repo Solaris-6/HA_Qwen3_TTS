@@ -83,7 +83,22 @@ def _commands() -> list[tuple[str, list[str]]]:
     return [
         (
             "uv",
-            [sys.executable, "-m", "uv", "pip", "install", "--python", sys.executable, *constraints, *reqs],
+            [
+                sys.executable,
+                "-m",
+                "uv",
+                "pip",
+                "install",
+                "--python",
+                sys.executable,
+                # Home Assistant puts its own wheel index first; without this
+                # flag uv only considers versions from that index for the
+                # packages it contains and resolution fails.
+                "--index-strategy",
+                "unsafe-first-match",
+                *constraints,
+                *reqs,
+            ],
         ),
         (
             "pip",

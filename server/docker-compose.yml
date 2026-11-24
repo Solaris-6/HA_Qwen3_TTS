@@ -1,0 +1,29 @@
+# Qwen3-TTS server for the Home Assistant integration.
+#
+#   docker compose up -d --build
+#
+# Put the model in ./models/Qwen3-TTS-12Hz-0.6B-Base, or switch the --model
+# argument to a Hugging Face repo id and mount a cache volume instead.
+services:
+  qwen3-tts:
+    build: .
+    image: qwen3-tts-server:1.0
+    container_name: qwen3-tts-server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/models:ro
+      # Only needed when --model is a Hugging Face repo id:
+      # - ./hf-cache:/root/.cache/huggingface
+    command:
+      - python
+      - -u
+      - qwen3_tts_server.py
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8000"
+      - --model
+      - /models/Qwen3-TTS-12Hz-0.6B-Base
+      - --preload

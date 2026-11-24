@@ -3,6 +3,30 @@
     "step": {
       "user": {
         "title": "Configure Qwen3-TTS",
+        "description": "Choose where the model runs.\n\nEnter the address of a Qwen3-TTS server in your network, or leave the field empty to run the model inside Home Assistant.",
+        "data": {
+          "server_url": "Qwen3-TTS server"
+        },
+        "data_description": {
+          "server_url": "Address of the server started with `server/qwen3_tts_server.py`, for example `http://192.168.1.139:8000`. Leave empty to run the model inside Home Assistant (Home Assistant OS and Container cannot install PyTorch)."
+        }
+      },
+      "server": {
+        "title": "Qwen3-TTS server",
+        "description": "The model runs on the server: Home Assistant only sends the text and receives the audio. Make sure the server is running before continuing.",
+        "data": {
+          "ref_audio": "Reference audio",
+          "ref_text": "Reference transcript",
+          "language": "Language"
+        },
+        "data_description": {
+          "ref_audio": "Path to the audio file whose voice will be cloned (WAV or MP3). Keep the default to use the voice shipped with the integration.",
+          "ref_text": "Exact transcript of the reference audio. When filled in, voice cloning is noticeably more accurate.",
+          "language": "Default language used for speech synthesis."
+        }
+      },
+      "local": {
+        "title": "Configure Qwen3-TTS",
         "description": "Set up the local Qwen3-TTS model. The model must already be downloaded into Home Assistant, for example in `/config/models`.",
         "data": {
           "model_path": "Model path",
@@ -21,7 +45,10 @@
     "error": {
       "model_path_not_found": "The model folder does not exist.",
       "model_incomplete": "The model folder is incomplete. Download the whole repository from Hugging Face, including the speech_tokenizer folder and generation_config.json.",
-      "ref_audio_not_found": "The reference audio file does not exist."
+      "ref_audio_not_found": "The reference audio file does not exist.",
+      "cannot_connect": "Unable to contact the server at this address. Check the URL, the port and that the server is running.",
+      "invalid_url": "Enter a valid address starting with http:// or https://, without spaces.",
+      "server_error": "The server answered but cannot load the model. Check the server log."
     },
     "abort": {
       "already_configured": "Qwen3-TTS is already configured."
@@ -36,20 +63,25 @@
           "model_path": "Model path",
           "ref_audio": "Reference audio",
           "ref_text": "Reference transcript",
-          "language": "Language"
+          "language": "Language",
+          "server_url": "Qwen3-TTS server"
         },
         "data_description": {
           "model_path": "Folder containing the Qwen3-TTS model downloaded from Hugging Face.",
           "ref_audio": "Path to the audio file whose voice will be cloned (WAV or MP3). Keep the default to use the voice shipped with the integration.",
           "ref_text": "Exact transcript of the reference audio. When filled in, voice cloning is noticeably more accurate.",
-          "language": "Default language used for speech synthesis."
+          "language": "Default language used for speech synthesis.",
+          "server_url": "Address of the Qwen3-TTS server, for example `http://192.168.1.139:8000`."
         }
       }
     },
     "error": {
       "model_path_not_found": "The model folder does not exist.",
       "model_incomplete": "The model folder is incomplete. Download the whole repository from Hugging Face, including the speech_tokenizer folder and generation_config.json.",
-      "ref_audio_not_found": "The reference audio file does not exist."
+      "ref_audio_not_found": "The reference audio file does not exist.",
+      "cannot_connect": "Unable to contact the server at this address. Check the URL, the port and that the server is running.",
+      "invalid_url": "Enter a valid address starting with http:// or https://, without spaces.",
+      "server_error": "The server answered but cannot load the model. Check the server log."
     }
   }
 }

@@ -1,13 +1,25 @@
 # Qwen3 TTS per Home Assistant
 
-Integrazione **HACS** per Home Assistant che aggiunge un motore di sintesi vocale (Text-to-Speech) **locale e offline** basato su Qwen3-TTS, con **clonazione della voce** da un file audio di riferimento.
+Integrazione **HACS** per Home Assistant che aggiunge un motore di sintesi vocale (Text-to-Speech) basato su **Qwen3-TTS**, con **clonazione della voce** da un file audio di riferimento.
+
+Il modello può girare in due modi:
+
+- **🌐 Server di rete (consigliato)**: il modello gira su un server della tua rete (Raspberry Pi, Mini PC, NAS, PC) e Home Assistant gli invia solo il testo. Funziona su **qualsiasi** Home Assistant.
+- **🏠 Locale**: il modello gira dentro Home Assistant, ma solo se HA riesce ad installare PyTorch (vedi sotto).
+
+## Perché serve un server
+
+> ⚠️ Le immagini **ufficiali** di Home Assistant (OS, Container, Supervised) girano su **Alpine Linux/musl**, mentre PyTorch pubblica soltanto wheel per **glibc**. Dentro Home Assistant ufficiale, `pip install qwen-tts` fallisce sempre con errori del tipo `No matching distribution found for torchaudio`.
+>
+> La modalità server risolve il problema: un piccolo processo standalone (una riga di comando, oppure un container Docker) carica il modello e lo espone su HTTP. Home Assistant non installa **nessuna** dipendenza pesante.
 
 ## Caratteristiche
 
 - Entità TTS `tts.qwen3_tts` utilizzabile in assistente vocale, automazioni e servizi `tts.speak`
-- Clonazione della voce in locale: nessuna chiamata a servizi cloud
+- Clonazione della voce: nessuna chiamata a servizi cloud
 - 10 lingue supportate (italiano incluso, predefinito)
-- Supporto GPU NVIDIA (CUDA, bfloat16) automatico, altrimenti CPU (float32)
+- Server standalone in Python (solo dipendenze di `qwen-tts`), con API `/health` e `/synthesize`
+- GPU NVIDIA (CUDA, bfloat16) automatica, altrimenti CPU (float32)
 - Setup tramite Config Flow (nessuna modifica manuale di `configuration.yaml`)
 - Traduzioni in italiano, inglese e altre 8 lingue
 - Validazione CI automatica (HACS + hassfest)
@@ -15,40 +27,17 @@ Integrazione **HACS** per Home Assistant che aggiunge un motore di sintesi vocal
 ## Requisiti
 
 - Home Assistant **2024.12.0** o superiore
-- Circa **4 GB di RAM liberi** per il modello base (8 GB consigliati)
-- Circa **2,5 GB di spazio** per il modello
-- GPU NVIDIA opzionale ma consigliata per risposte rapide
-- Il modello deve già essere scaricato in Home Assistant prima della configurazione
+- Per la modalità **server** (consigliata):
+  - un computer raggiungibile in rete (va bene una Raspberry Pi 4/5, un Mini PC, un NAS o il tuo PC)
+  - **4 GB di RAM liberi** per il modello base (8 GB consigliati)
+  - circa **3 GB di spazio** per il modello e le dipendenze
+  - Python 3.10–3.13 oppure Docker
+  - GPU opzionale ma consigliata (senza GPU ogni frase richiede decine di secondi)
+- Per la modalità **locale**: la stessa macchina di Home Assistant deve poter installare PyTorch (Home Assistant Core in un venv su Debian/Ubuntu/Windows). **Non funziona** su HA OS / Container.
 
 ## Installazione
 
-###1. Scarica il modello (una tantum)
-
-Scarica l'intero repository del modello (~2,5 GB) in una cartella di Home Assistant, ad esempio `/config/models/Qwen3-TTS-12Hz-0.6B-Base`.
-
-Da un computer con [Hugging Face CLI](https://huggingface.co/docs/huggingface_hub/main/en/guides/cli):
-
-```bash
-hf download Qwen/Qwen3-TTS-12Hz-0.6B-Base --local-dir ./Qwen3-TTS-12Hz-0.6B-Base
-```
-
-poi copia la cartella in `/config/models/` di Home Assistant (add-on Terminal/SSH, File editor, SFTP...).
-
-La cartella del modello **deve** contenere tra gli altri:
-
-```text
-Qwen3-TTS-12Hz-0.6B-Base/
-├── config.json
-├── generation_config.json
-├── model.safetensors
-└── speech_tokenizer/
-    ├── config.json
-    └── model.safetensors
-```
-
-> ⚠️ Senza la cartella `speech_tokenizer/` e `generation_config.json` l'integrazione non funziona: durante la configurazione riceverai l'errore «modello incompleto».
-
-###2. Installa l'integrazione tramite HACS
+### 1. Installa l'integrazione tramite HACS
 
 1. Apri **HACS** → **Integrazioni** → menu (⋮) → **Repository personalizzati**
 2. Inserisci l'URL `https://github.com/Solaris-6/HA_Qwen3_TTS` e scegli tipo **Integration**
@@ -56,20 +45,78 @@ Qwen3-TTS-12Hz-0.6B-Base/
 
 Installazione manuale alternativa: copia la cartella `custom_components/qwen3_tts` dentro `/config/custom_components/` e riavvia Home Assistant.
 
-> 💾 Le dipendenze (`qwen-tts==0.1.1`, PyTorch e compagni, circa **3 GB**) **non** vengono più scaricate quando apri il config flow: vengono installate quando salvi la configurazione, cioè al primo setup della scheda. Il download può richiedere **diversi minuti**: nel frattempo la scheda resta in stato «Setup retry» e poi si attiva da sola. Se l'installazione fallisce, in **Impostazioni → Sistema → Log** trovi il messaggio completo cercando `qwen3_tts.deps`.
+### 2a. Avvia il server Qwen3-TTS (consigliato)
 
-###3. Configura l'integrazione
+Sul computer che ospiterà il modello (es. `192.168.1.139`):
+
+```bash
+git clone https://github.com/Solaris-6/HA_Qwen3_TTS
+cd HA_Qwen3_TTS
+python3 -m venv .venv
+source .venv/bin/activate              # Windows: .venv\Scripts\activate
+
+# dipendenze (torch CPU, ~700 MB)
+pip install -r server/requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
+
+# modello (~2,5 GB): scaricalo da Hugging Face...
+pip install -U "huggingface_hub[cli]"
+hf download Qwen/Qwen3-TTS-12Hz-0.6B-Base --local-dir ./models/Qwen3-TTS-12Hz-0.6B-Base
+
+# avvia il server (resta in primo piano, log su stdout)
+python -u server/qwen3_tts_server.py --model ./models/Qwen3-TTS-12Hz-0.6B-Base --preload
+```
+
+In alternativa con **Docker** (utile su NAS e Raspberry Pi):
+
+```bash
+cd server
+mkdir -p models
+# copia il modello dentro server/models/Qwen3-TTS-12Hz-0.6B-Base
+docker compose up -d --build
+```
+
+Verifica che il server risponda:
+
+```bash
+python tools/test_server.py --url http://192.168.1.139:8000
+```
+
+Argomenti utili di `server/qwen3_tts_server.py`:
+
+| Argomento | Descrizione |
+|---|---|
+| `--host` / `--port` | Indirizzo e porta (default `0.0.0.0:8000`) |
+| `--model` | Cartella locale **oppure** repo Hugging Face (scaricata al primo avvio) |
+| `--device` | `auto` (default), `cpu` oppure `cuda` |
+| `--preload` | Carica il modello già all'avvio |
+| `--default-ref` | Audio di riferimento usato se la richiesta non ne include uno |
+| `--log-level` | `DEBUG`, `INFO`, `WARNING`, ... |
+
+> 🔒 Il server non ha autenticazione: usalo solo nella tua rete locale e non esporlo su internet.
+
+### 2b. Alternativa: modello dentro Home Assistant (solo HA Core)
+
+Se il tuo Home Assistant può installare pacchetti Python (HA Core in venv, non HA OS/Container):
+
+1. Scarica il modello in `/config/models/Qwen3-TTS-12Hz-0.6B-Base` (con `hf download Qwen/Qwen3-TTS-12Hz-0.6B-Base --local-dir ...`)
+2. Durante la configurazione **lascia vuoto** il campo del server: l'integrazione installerà `qwen-tts` (circa **3 GB**, diversi minuti) al primo setup della scheda
+3. Se l'installazione fallisce, in **Impostazioni → Sistema → Log** trovi il dettaglio cercando `qwen3_tts.deps`
+
+### 3. Configura l'integrazione
 
 **Impostazioni → Dispositivi e servizi → Aggiungi integrazione → Qwen3 TTS**
 
+- **Primo passo**: inserisci l'indirizzo del server, ad esempio `http://192.168.1.139:8000`. Lascia il campo **vuoto** per la modalità locale. L'integrazione verifica subito che il server risponda.
+- **Secondo passo**:
+
 | Opzione | Descrizione | Predefinito |
 |---|---|---|
-| Percorso del modello | Cartella del modello scaricato | `/config/models/Qwen3-TTS-12Hz-0.6B-Base` |
 | Audio di riferimento | File audio (WAV/MP3) la cui voce verrà clonata | `audio/claudia.wav` inclusa |
 | Trascrizione del riferimento | Testo esatto pronunciato nell'audio di riferimento (opzionale) | vuoto |
 | Lingua | Lingua predefinita della sintesi | `it` |
 
 - **Trascrizione del riferimento**: se compilata l'audio usa la modalità ICL, con maggiore fedeltà della voce; se lasciata vuota viene usata solo l'impronta vocale (funziona comunque, con risultato leggermente meno simile).
+- In modalità locale compare anche il **percorso del modello** (`/config/models/Qwen3-TTS-12Hz-0.6B-Base`).
 - Le opzioni sono modificabili in qualsiasi momento dalla rotella ⚙️ della scheda integrazione.
 
 ## Utilizzo
@@ -78,7 +125,15 @@ Installazione manuale alternativa: copia la cartella `custom_components/qwen3_tt
 - **Assistente vocale**: seleziona `Qwen3 TTS` come motore TTS nella pipeline
 - **Servizi**: `tts.speak` con entità media player, o le automazioni con `service: tts.speak`
 
-La prima generazione richiede 10–60 secondi (caricamento del modello in RAM); in seguito il modello resta in memoria e le generazioni successive sono più rapide.
+Tempi indicativi per una frase di ~10 parole:
+
+| Ambiente | Tempo |
+|---|---|
+| GPU (CUDA) | 5–15 s |
+| CPU desktop | 20–60 s |
+| Raspberry Pi (CPU) | 60–180 s |
+
+La **prima** richiesta richiede in più il caricamento del modello (30–60 s): usa `--preload` per anticiparlo.
 
 ### Verifica della riproduzione audio
 
@@ -96,7 +151,10 @@ python tools/test_audio.py tone
 # 3) Sintesi reale con il codice dell'integrazione (serve qwen-tts installato)
 python tools/test_audio.py synth "Ciao, questa è una prova di sintesi." --model /percorso/del/modello
 
-# 4) Valida un file WAV qualsiasi
+# 4) Verifica il server (solo standard library)
+python tools/test_server.py --url http://192.168.1.139:8000
+
+# 5) Valida un file WAV qualsiasi
 python tools/test_audio.py check tools/output/test_tone.wav
 ```
 
@@ -112,18 +170,20 @@ logger:
     qwen_tts: debug
 ```
 
-Riavvia Home Assistant. I log sono consultabili in **Impostazioni → Sistema → Log**, filtrando per `qwen3_tts`.
+Riavvia Home Assistant. I log sono consultabili in **Impostazioni → Sistema → Log**, filtrando per `qwen3_tts`. Sul server, i log della sintesi sono su stdout (o `docker logs qwen3-tts-server`).
 
 ### Problemi comuni
 
 | Sintomo | Causa probabile |
 |---|---|
-| «Error playing audio» | Guarda il log: di solito mancano le dipendenze `qwen-tts` (primo setup non completato) o la cartella del modello è incompleta |
-| «Impossibile caricare il flusso di configurazione: 500 Internal Server Error» | Home Assistant non è riuscito a installare i requisiti mentre apriva il flusso. Aggiorna l'integrazione alla **1.1.1 o superiore** (l'installazione è stata spostata al setup della scheda) e controlla il log |
-| Scheda bloccata in «Setup retry» | Installazione delle dipendenze non riuscita: nel log cerca `qwen3_tts.deps` (spesso spazio su disco insufficiente o rete) |
+| «Impossibile caricare il flusso di configurazione: 500 Internal Server Error» | Versione dell'integrazione vecchia (< 1.1.1) che installava `qwen-tts` mentre apriva il flusso: aggiorna |
+| Il config flow rifiuta l'indirizzo del server (`cannot_connect`) | Server spento, porta sbagliata o indirizzo di un altro servizio: verifica con `python tools/test_server.py --url ...` |
+| «The Qwen3-TTS server ... is not reachable» nel log | Il server si è spento dopo la configurazione: riavvialo, poi ricarica l'integrazione |
+| Scheda bloccata in «Setup retry» (solo modalità locale) | Installazione di `qwen-tts` non riuscita: nel log cerca `qwen3_tts.deps` |
+| «Error playing audio» | Guarda il log: modello incompleto, audio di riferimento mancante o server non raggiungibile |
+| Sintesi lentissima sul server | Normale su CPU/Raspberry Pi: valuta una GPU o accetta i tempi nella tabella sopra |
 | Errore «modello incompleto» in configurazione | Mancano `speech_tokenizer/` o `generation_config.json`: riscarica l'intero repository |
 | Errore «audio di riferimento non esiste» | Il percorso in `ref_audio` non è valido |
-| Primo setup lentissimo | Normale: vengono installate le dipendenze (PyTorch e compagni, ~3 GB) |
 
 ## Struttura del repository
 
@@ -135,19 +195,24 @@ HA_Qwen3_TTS/
 │   └── qwen3_tts/
 │       ├── __init__.py         # Setup della config entry
 │       ├── audio/              # Voci di riferimento incluse (claudia.wav)
-│       ├── config_flow.py      # Configurazione da interfaccia
+│       ├── config_flow.py      # Configurazione da interfaccia (server o locale)
 │       ├── const.py            # Costanti
-│       ├── deps.py             # Installazione automatica di qwen-tts
-│       ├── manifest.json       # Metadati (requirements vuoti: vedi deps.py)
+│       ├── deps.py             # Installazione di qwen-tts (solo modalità locale)
+│       ├── manifest.json       # Metadati (requirements vuoti)
 │       ├── services.yaml       # Documentazione servizi
 │       ├── strings.json        # Stringhe di origine (inglese)
-│       ├── tts.py              # Piattaforma TTS
+│       ├── tts.py              # Piattaforma TTS (client del server o motore locale)
 │       └── translations/       # 10 lingue
+├── server/                     # Server standalone per la modalità di rete
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── qwen3_tts_server.py     # API HTTP: /health e /synthesize
+│   └── requirements.txt
 ├── hacs.json                   # Metadati HACS
 ├── LICENSE                     # MIT
 ├── README.md
 ├── requirements.txt
-└── tools/                      # Script di diagnostica audio (test_audio.py)
+└── tools/                      # Diagnostica (test_audio.py, test_server.py)
 ```
 
 ## Aggiornamenti

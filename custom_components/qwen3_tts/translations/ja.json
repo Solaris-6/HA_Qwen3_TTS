@@ -2,6 +2,30 @@
   "config": {
     "step": {
       "user": {
+        "title": "Qwen3-TTS の設定",
+        "description": "モデルの実行場所を選択します。\n\nネットワーク上の Qwen3-TTS サーバーのアドレスを入力するか、空欄のままにすると Home Assistant 内でモデルを実行します。",
+        "data": {
+          "server_url": "Qwen3-TTS サーバー"
+        },
+        "data_description": {
+          "server_url": "`server/qwen3_tts_server.py` で起動したサーバーのアドレス（例: `http://192.168.1.139:8000`）。空欄にすると Home Assistant 内でモデルを実行します（Home Assistant OS と Container では PyTorch をインストールできません）。"
+        }
+      },
+      "server": {
+        "title": "Qwen3-TTS サーバー",
+        "description": "モデルはサーバー側で実行されます。Home Assistant はテキストを送信し、音声を受け取ります。続行する前にサーバーが稼働していることを確認してください。",
+        "data": {
+          "ref_audio": "参照音声",
+          "ref_text": "参照音声の文字起こし",
+          "language": "言語"
+        },
+        "data_description": {
+          "ref_audio": "クローンする音声のファイルパス(WAV または MP3)。既定のままにすると、統合に同梱された音声が使用されます。",
+          "ref_text": "参照音声の正確な文字起こし。入力すると音声クローンの精度が大きく向上します。",
+          "language": "音声合成に使用する既定の言語。"
+        }
+      },
+      "local": {
         "title": "Qwen3-TTS を設定",
         "description": "ローカルの Qwen3-TTS モデルを設定します。モデルはすでに Home Assistant にダウンロードされている必要があります(例: `/config/models`)。",
         "data": {
@@ -21,7 +45,10 @@
     "error": {
       "model_path_not_found": "モデルのフォルダーが存在しません。",
       "model_incomplete": "モデルのフォルダーが不完全です。Hugging Face から speech_tokenizer フォルダーと generation_config.json を含むリポジトリ全体をダウンロードしてください。",
-      "ref_audio_not_found": "参照音声のファイルが存在しません。"
+      "ref_audio_not_found": "参照音声のファイルが存在しません。",
+      "cannot_connect": "このアドレスのサーバーに接続できません。URL、ポート、サーバーの稼働状況を確認してください。",
+      "invalid_url": "http:// または https:// で始まる、空白を含まない有効なアドレスを入力してください。",
+      "server_error": "サーバーは応答しましたが、モデルを読み込めません。サーバーのログを確認してください。"
     },
     "abort": {
       "already_configured": "Qwen3-TTS はすでに設定されています。"
@@ -36,20 +63,25 @@
           "model_path": "モデルのパス",
           "ref_audio": "参照音声",
           "ref_text": "参照音声の文字起こし",
-          "language": "言語"
+          "language": "言語",
+          "server_url": "Qwen3-TTS サーバー"
         },
         "data_description": {
           "model_path": "Hugging Face からダウンロードした Qwen3-TTS モデルが入っているフォルダー。",
           "ref_audio": "クローンする音声のファイルパス(WAV または MP3)。既定のままにすると、統合に同梱された音声が使用されます。",
           "ref_text": "参照音声の正確な文字起こし。入力すると音声クローンの精度が大きく向上します。",
-          "language": "音声合成に使用する既定の言語。"
+          "language": "音声合成に使用する既定の言語。",
+          "server_url": "Qwen3-TTS サーバーのアドレス（例: `http://192.168.1.139:8000`）。"
         }
       }
     },
     "error": {
       "model_path_not_found": "モデルのフォルダーが存在しません。",
       "model_incomplete": "モデルのフォルダーが不完全です。Hugging Face から speech_tokenizer フォルダーと generation_config.json を含むリポジトリ全体をダウンロードしてください。",
-      "ref_audio_not_found": "参照音声のファイルが存在しません。"
+      "ref_audio_not_found": "参照音声のファイルが存在しません。",
+      "cannot_connect": "このアドレスのサーバーに接続できません。URL、ポート、サーバーの稼働状況を確認してください。",
+      "invalid_url": "http:// または https:// で始まる、空白を含まない有効なアドレスを入力してください。",
+      "server_error": "サーバーは応答しましたが、モデルを読み込めません。サーバーのログを確認してください。"
     }
   }
 }

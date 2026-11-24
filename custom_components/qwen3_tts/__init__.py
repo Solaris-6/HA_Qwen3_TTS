@@ -6,7 +6,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
 
 from . import deps
-from .const import DOMAIN
+from .const import CONF_MODE, DOMAIN, MODE_SERVER
 
 PLATFORMS = ["tts"]
 
@@ -20,6 +20,12 @@ async def async_setup(_hass, _config):
 
 async def async_setup_entry(hass, config_entry, _async_add_entities=None):
     """Set up Qwen3-TTS from a config entry."""
+    # In server mode the model runs somewhere else in the network and no
+    # Python dependency has to be installed here at all.
+    if config_entry.data.get(CONF_MODE) == MODE_SERVER:
+        await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
+        return None
+
     # Le dipendenze (qwen-tts + PyTorch e compagni) non stanno più nel
     # manifest: Home Assistant le installerebbe mentre carica il config flow e
     # un errore in quella fase fa esplodere l'interfaccia con un «500».

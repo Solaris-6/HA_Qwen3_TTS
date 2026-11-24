@@ -3,6 +3,30 @@
     "step": {
       "user": {
         "title": "配置 Qwen3-TTS",
+        "description": "选择模型的运行位置。\n\n输入网络中 Qwen3-TTS 服务器的地址，或留空以在 Home Assistant 内部运行模型。",
+        "data": {
+          "server_url": "Qwen3-TTS 服务器"
+        },
+        "data_description": {
+          "server_url": "使用 `server/qwen3_tts_server.py` 启动的服务器地址，例如 `http://192.168.1.139:8000`。留空则在 Home Assistant 内部运行模型（Home Assistant OS 和 Container 无法安装 PyTorch）。"
+        }
+      },
+      "server": {
+        "title": "Qwen3-TTS 服务器",
+        "description": "模型在服务器上运行：Home Assistant 只发送文本并接收音频。继续之前请确保服务器正在运行。",
+        "data": {
+          "ref_audio": "参考音频",
+          "ref_text": "参考文本",
+          "language": "语言"
+        },
+        "data_description": {
+          "ref_audio": "要克隆声音的音频文件路径（WAV 或 MP3）。保持默认值即可使用集成自带的声音。",
+          "ref_text": "参考音频的准确文字内容。填写后声音克隆会明显更准确。",
+          "language": "语音合成使用的默认语言。"
+        }
+      },
+      "local": {
+        "title": "配置 Qwen3-TTS",
         "description": "设置本地 Qwen3-TTS 模型。模型需要已下载到 Home Assistant 中，例如放在 `/config/models`。",
         "data": {
           "model_path": "模型路径",
@@ -21,7 +45,10 @@
     "error": {
       "model_path_not_found": "模型文件夹不存在。",
       "model_incomplete": "模型文件夹不完整。请从 Hugging Face 下载完整的仓库，包括 speech_tokenizer 文件夹和 generation_config.json。",
-      "ref_audio_not_found": "参考音频文件不存在。"
+      "ref_audio_not_found": "参考音频文件不存在。",
+      "cannot_connect": "无法连接到该地址的服务器。请检查 URL、端口以及服务器是否正在运行。",
+      "invalid_url": "请输入以 http:// 或 https:// 开头的有效地址，且不含空格。",
+      "server_error": "服务器有响应，但无法加载模型。请检查服务器日志。"
     },
     "abort": {
       "already_configured": "Qwen3-TTS 已经配置过了。"
@@ -36,20 +63,25 @@
           "model_path": "模型路径",
           "ref_audio": "参考音频",
           "ref_text": "参考文本",
-          "language": "语言"
+          "language": "语言",
+          "server_url": "Qwen3-TTS 服务器"
         },
         "data_description": {
           "model_path": "从 Hugging Face 下载的 Qwen3-TTS 模型所在文件夹。",
           "ref_audio": "要克隆声音的音频文件路径（WAV 或 MP3）。保持默认值即可使用集成自带的声音。",
           "ref_text": "参考音频的准确文字内容。填写后声音克隆会明显更准确。",
-          "language": "语音合成使用的默认语言。"
+          "language": "语音合成使用的默认语言。",
+          "server_url": "Qwen3-TTS 服务器地址，例如 `http://192.168.1.139:8000`。"
         }
       }
     },
     "error": {
       "model_path_not_found": "模型文件夹不存在。",
       "model_incomplete": "模型文件夹不完整。请从 Hugging Face 下载完整的仓库，包括 speech_tokenizer 文件夹和 generation_config.json。",
-      "ref_audio_not_found": "参考音频文件不存在。"
+      "ref_audio_not_found": "参考音频文件不存在。",
+      "cannot_connect": "无法连接到该地址的服务器。请检查 URL、端口以及服务器是否正在运行。",
+      "invalid_url": "请输入以 http:// 或 https:// 开头的有效地址，且不含空格。",
+      "server_error": "服务器有响应，但无法加载模型。请检查服务器日志。"
     }
   }
 }

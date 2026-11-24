@@ -3,6 +3,30 @@
     "step": {
       "user": {
         "title": "Configurer Qwen3-TTS",
+        "description": "Choisissez où le modèle s'exécute.\n\nSaisissez l'adresse d'un serveur Qwen3-TTS sur votre réseau, ou laissez le champ vide pour exécuter le modèle dans Home Assistant.",
+        "data": {
+          "server_url": "Serveur Qwen3-TTS"
+        },
+        "data_description": {
+          "server_url": "Adresse du serveur lancé avec `server/qwen3_tts_server.py`, par exemple `http://192.168.1.139:8000`. Laissez vide pour exécuter le modèle dans Home Assistant (Home Assistant OS et Container ne peuvent pas installer PyTorch)."
+        }
+      },
+      "server": {
+        "title": "Serveur Qwen3-TTS",
+        "description": "Le modèle s'exécute sur le serveur : Home Assistant n'envoie que le texte et reçoit l'audio. Vérifiez que le serveur est en cours d'exécution avant de continuer.",
+        "data": {
+          "ref_audio": "Audio de référence",
+          "ref_text": "Transcription de référence",
+          "language": "Langue"
+        },
+        "data_description": {
+          "ref_audio": "Chemin du fichier audio dont la voix sera clonée (WAV ou MP3). Conservez la valeur par défaut pour utiliser la voix fournie avec l'intégration.",
+          "ref_text": "Transcription exacte de l'audio de référence. Renseignée, elle rend le clonage de voix nettement plus précis.",
+          "language": "Langue par défaut utilisée pour la synthèse vocale."
+        }
+      },
+      "local": {
+        "title": "Configurer Qwen3-TTS",
         "description": "Configurez le modèle local Qwen3-TTS. Le modèle doit déjà être téléchargé dans Home Assistant, par exemple dans `/config/models`.",
         "data": {
           "model_path": "Chemin du modèle",
@@ -21,7 +45,10 @@
     "error": {
       "model_path_not_found": "Le dossier du modèle n'existe pas.",
       "model_incomplete": "Le dossier du modèle est incomplet. Téléchargez tout le dépôt depuis Hugging Face, y compris le dossier speech_tokenizer et le fichier generation_config.json.",
-      "ref_audio_not_found": "Le fichier audio de référence n'existe pas."
+      "ref_audio_not_found": "Le fichier audio de référence n'existe pas.",
+      "cannot_connect": "Impossible de contacter le serveur à cette adresse. Vérifiez l'URL, le port et que le serveur est en marche.",
+      "invalid_url": "Saisissez une adresse valide commençant par http:// ou https://, sans espaces.",
+      "server_error": "Le serveur a répondu mais ne peut pas charger le modèle. Vérifiez le journal du serveur."
     },
     "abort": {
       "already_configured": "Qwen3-TTS est déjà configuré."
@@ -36,20 +63,25 @@
           "model_path": "Chemin du modèle",
           "ref_audio": "Audio de référence",
           "ref_text": "Transcription de référence",
-          "language": "Langue"
+          "language": "Langue",
+          "server_url": "Serveur Qwen3-TTS"
         },
         "data_description": {
           "model_path": "Dossier contenant le modèle Qwen3-TTS téléchargé depuis Hugging Face.",
           "ref_audio": "Chemin du fichier audio dont la voix sera clonée (WAV ou MP3). Conservez la valeur par défaut pour utiliser la voix fournie avec l'intégration.",
           "ref_text": "Transcription exacte de l'audio de référence. Renseignée, elle rend le clonage de voix nettement plus précis.",
-          "language": "Langue par défaut utilisée pour la synthèse vocale."
+          "language": "Langue par défaut utilisée pour la synthèse vocale.",
+          "server_url": "Adresse du serveur Qwen3-TTS, par exemple `http://192.168.1.139:8000`."
         }
       }
     },
     "error": {
       "model_path_not_found": "Le dossier du modèle n'existe pas.",
       "model_incomplete": "Le dossier du modèle est incomplet. Téléchargez tout le dépôt depuis Hugging Face, y compris le dossier speech_tokenizer et le fichier generation_config.json.",
-      "ref_audio_not_found": "Le fichier audio de référence n'existe pas."
+      "ref_audio_not_found": "Le fichier audio de référence n'existe pas.",
+      "cannot_connect": "Impossible de contacter le serveur à cette adresse. Vérifiez l'URL, le port et que le serveur est en marche.",
+      "invalid_url": "Saisissez une adresse valide commençant par http:// ou https://, sans espaces.",
+      "server_error": "Le serveur a répondu mais ne peut pas charger le modèle. Vérifiez le journal du serveur."
     }
   }
 }
