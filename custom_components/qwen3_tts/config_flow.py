@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlow
-from homeassistant.data_entry_flow import FlowResult
 
 from .const import (
     CONF_LANGUAGE,
@@ -25,6 +24,12 @@ from .const import (
     DOMAIN,
     SUPPORTED_LANGUAGES,
 )
+
+if TYPE_CHECKING:
+    # Imported only for static type checking: the import must never run at
+    # runtime so the config flow keeps loading on every Home Assistant
+    # version that still exports FlowResult.
+    from homeassistant.data_entry_flow import FlowResult
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -56,7 +56,7 @@ Qwen3-TTS-12Hz-0.6B-Base/
 
 Installazione manuale alternativa: copia la cartella `custom_components/qwen3_tts` dentro `/config/custom_components/` e riavvia Home Assistant.
 
-> 💾 Al primo avvio Home Assistant installa automaticamente la dipendenza `qwen-tts==0.1.1` (PyTorch e compagni): il download può richiedere **diversi minuti**. Controlla il log se sembra bloccato.
+> 💾 Le dipendenze (`qwen-tts==0.1.1`, PyTorch e compagni, circa **3 GB**) **non** vengono più scaricate quando apri il config flow: vengono installate quando salvi la configurazione, cioè al primo setup della scheda. Il download può richiedere **diversi minuti**: nel frattempo la scheda resta in stato «Setup retry» e poi si attiva da sola. Se l'installazione fallisce, in **Impostazioni → Sistema → Log** trovi il messaggio completo cercando `qwen3_tts.deps`.
 
 ###3. Configura l'integrazione
 
@@ -118,10 +118,12 @@ Riavvia Home Assistant. I log sono consultabili in **Impostazioni → Sistema �
 
 | Sintomo | Causa probabile |
 |---|---|
-| «Error playing audio» | Guarda il log: di solito mancano i requisiti `qwen-tts` (primo avvio non completato) o la cartella del modello è incompleta |
+| «Error playing audio» | Guarda il log: di solito mancano le dipendenze `qwen-tts` (primo setup non completato) o la cartella del modello è incompleta |
+| «Impossibile caricare il flusso di configurazione: 500 Internal Server Error» | Home Assistant non è riuscito a installare i requisiti mentre apriva il flusso. Aggiorna l'integrazione alla **1.1.1 o superiore** (l'installazione è stata spostata al setup della scheda) e controlla il log |
+| Scheda bloccata in «Setup retry» | Installazione delle dipendenze non riuscita: nel log cerca `qwen3_tts.deps` (spesso spazio su disco insufficiente o rete) |
 | Errore «modello incompleto» in configurazione | Mancano `speech_tokenizer/` o `generation_config.json`: riscarica l'intero repository |
 | Errore «audio di riferimento non esiste» | Il percorso in `ref_audio` non è valido |
-| Primo avvio lentissimo | Normale: pip sta installando PyTorch e dipendenze |
+| Primo setup lentissimo | Normale: vengono installate le dipendenze (PyTorch e compagni, ~3 GB) |
 
 ## Struttura del repository
 
@@ -135,7 +137,8 @@ HA_Qwen3_TTS/
 │       ├── audio/              # Voci di riferimento incluse (claudia.wav)
 │       ├── config_flow.py      # Configurazione da interfaccia
 │       ├── const.py            # Costanti
-│       ├── manifest.json       # Metadati + requisiti Python
+│       ├── deps.py             # Installazione automatica di qwen-tts
+│       ├── manifest.json       # Metadati (requirements vuoti: vedi deps.py)
 │       ├── services.yaml       # Documentazione servizi
 │       ├── strings.json        # Stringhe di origine (inglese)
 │       ├── tts.py              # Piattaforma TTS

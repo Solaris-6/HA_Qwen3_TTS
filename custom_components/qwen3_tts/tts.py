@@ -58,8 +58,9 @@ def _load_model(model_path: str) -> Any:
         except ImportError as err:
             _LOGGER.error(
                 "Missing dependency for Qwen3-TTS (%s). "
-                "Home Assistant installs it from the integration manifest, "
-                "check that the requirements were installed and restart.",
+                "Home Assistant installs the dependencies when the config "
+                "entry is set up: check the log for messages from "
+                "'qwen3_tts.deps' and reload the integration.",
                 err,
             )
             raise
