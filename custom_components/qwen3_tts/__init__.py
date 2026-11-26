@@ -6,7 +6,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
 
 from . import deps
-from .const import CONF_MODE, DOMAIN, MODE_SERVER
+from .const import CONF_MODE, CONF_SERVER_URL, DOMAIN, MODE_SERVER
 
 PLATFORMS = ["tts"]
 
@@ -21,8 +21,16 @@ async def async_setup(_hass, _config):
 async def async_setup_entry(hass, config_entry, _async_add_entities=None):
     """Set up Qwen3-TTS from a config entry."""
     # In server mode the model runs somewhere else in the network and no
-    # Python dependency has to be installed here at all.
-    if config_entry.data.get(CONF_MODE) == MODE_SERVER:
+    # Python dependency has to be installed here at all.  An entry created
+    # before the mode field existed is treated as server mode when it carries
+    # a server URL, so upgrades from the old local-only installs do not try to
+    # install PyTorch on Home Assistant OS.
+    data = config_entry.data
+    is_server = (
+        data.get(CONF_MODE) == MODE_SERVER
+        or (CONF_MODE not in data and CONF_SERVER_URL in data)
+    )
+    if is_server:
         await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
         return None
 
@@ -36,7 +44,11 @@ async def async_setup_entry(hass, config_entry, _async_add_entities=None):
         if error is not None:
             raise ConfigEntryNotReady(
                 "Dipendenze di Qwen3-TTS (qwen-tts==0.1.1) non installate: "
-                f"{error}. Controlla il log per l'output completo dell'installer."
+                f"{error}. Su Home Assistant OS/Container l'installazione locale "
+                "non e' supportata (PyTorch non pubblica wheel per musl/Alpine): "
+                "elimina questa scheda e ricrealala in modalita' server "
+                "(inserisci l'URL del server Raspberry Pi). "
+                "Controlla il log per l'output completo dell'installer."
             )
 
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
