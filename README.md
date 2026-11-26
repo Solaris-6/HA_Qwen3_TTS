@@ -47,7 +47,7 @@ Installazione manuale alternativa: copia la cartella `custom_components/qwen3_tt
 
 ### 2a. Avvia il server Qwen3-TTS (consigliato)
 
-#### La tua rete (Home Assistant su Raspberry Pi 5 a `192.168.1.114`, server su Raspberry Pi 4 a `192.168.1.139`)
+#### La tua rete (Home Assistant su Raspberry Pi 5 a `tuo IP`, server su Raspberry Pi 4+ a `tuo IP`)
 
 Il modello (`Qwen3-TTS-12Hz-0.6B-Base`) gira interamente sul **Raspberry Pi 4**: Home Assistant (sul Pi 5) non installa nulla di pesante e si limita a inviare il testo. Il Pi 4 deve avere **almeno 4 GB di RAM** (8 GB consigliati); con 4 GB aggiungi una swap di 2 GB per non avere interruzioni.
 
