@@ -171,6 +171,40 @@ def _read_file(path: str) -> bytes:
         return handle.read()
 
 
+def _resolve_ref_audio(path: str) -> str:
+    """Resolve a reference audio path, with fallbacks for the bundled file.
+
+    On Home Assistant the integration lives under ``/config/custom_components``;
+    the bundled ``audio/claudia.wav`` is shipped next to ``tts.py``.  When the
+    configured path does not exist we try a few well known locations so a
+    missing/relative value does not silently break synthesis.
+    """
+    if path and os.path.isfile(path):
+        return path
+
+    # Only fall back to the bundled voice when nothing usable was given.
+    if not path:
+        bundled = os.path.join(os.path.dirname(__file__), "audio", "claudia.wav")
+        candidates = [
+            bundled,
+            "/config/custom_components/qwen3_tts/audio/claudia.wav",
+            "audio/claudia.wav",
+        ]
+        for candidate in candidates:
+            if candidate and os.path.isfile(candidate):
+                _LOGGER.info("Resolved reference audio to %s", candidate)
+                return candidate
+        _LOGGER.error("Bundled reference audio not found (tried: %s)", candidates)
+        return bundled
+
+    # Explicitly configured but missing: keep the value so callers can report it.
+    _LOGGER.error("Reference audio %r does not exist", path)
+    return path
+    """Read a file, blocking; runs in the executor."""
+    with open(path, "rb") as handle:
+        return handle.read()
+
+
 async def _ping_server(
     hass: HomeAssistant, session: aiohttp.ClientSession, url: str
 ) -> None:
@@ -237,7 +271,7 @@ class _BaseQwen3TTSEntity(TextToSpeechEntity):
         language: str,
     ) -> None:
         """Initialize the entity."""
-        self._ref_audio = ref_audio or DEFAULT_REF_AUDIO
+        self._ref_audio = _resolve_ref_audio(ref_audio or DEFAULT_REF_AUDIO)
         self._ref_text = ref_text or ""
         self._default_voice = voice
         self._default_language = language
@@ -264,9 +298,20 @@ class _BaseQwen3TTSEntity(TextToSpeechEntity):
 
     def _language_code(self, language: str) -> str | None:
         """Normalize the requested language, or None when unsupported."""
-        lang = (language or self._default_language).split("-")[0].lower()
+        lang = (language or self._default_language).split("-")[0].lower().replace("_", "")
+        if "_" in str(language or ""):
+            lang = str(language).strip().lower().replace("_", "-").split("-")[0]
         if lang not in SUPPORTED_LANGUAGES:
-            _LOGGER.error("Language %s is not supported by Qwen3-TTS", language)
+            # Try full name (e.g. "Italian", "English").
+            name_map = {v.lower(): k for k, v in LANGUAGE_NAMES.items()}
+            if str(language or "").strip().lower() in name_map:
+                lang = name_map[str(language).strip().lower()]
+        if lang not in SUPPORTED_LANGUAGES:
+            _LOGGER.error(
+                "Language %r is not supported by Qwen3-TTS (resolved to %r)",
+                language,
+                lang,
+            )
             return None
         return lang
 
@@ -420,7 +465,7 @@ async def async_setup_entry(
     def _get(key: str, default: Any) -> Any:
         return options.get(key, data.get(key, default))
 
-    ref_audio = _get(CONF_REF_AUDIO, "") or DEFAULT_REF_AUDIO
+    ref_audio = _resolve_ref_audio(_get(CONF_REF_AUDIO, "") or DEFAULT_REF_AUDIO)
     ref_text = _get(CONF_REF_TEXT, "") or ""
     voice = _get(CONF_VOICE, DEFAULT_VOICE)
     language = _get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
@@ -437,6 +482,12 @@ async def async_setup_entry(
             return
 
         session = aiohttp_client.async_get_clientsession(hass)
+        _LOGGER.info(
+            "Qwen3-TTS (server mode): server_url=%s, ref_audio=%s (exists=%s)",
+            server_url,
+            ref_audio,
+            os.path.isfile(ref_audio),
+        )
         async_add_entities(
             [
                 Qwen3TTSServerEntity(
