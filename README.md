@@ -179,7 +179,7 @@ Se il Raspberry Pi 4 ha casse collegate all'uscita audio (jack 3.5 mm), può rip
 # Sul Pi 4
 sudo apt install -y mpv alsa-utils
 # Il file audio_player.py è già nel repository (server/audio_player.py)
-sudo cp ~/HA_Qwen3_TTS/server/audio_player.py /home/casasantino/audio_player.py
+sudo cp ~/HA_Qwen3_TTS/server/audio_player.py /home/user/audio_player.py
 sudo tee /etc/systemd/system/audio-player.service > /dev/null <<'EOF'
 [Unit]
 Description=Audio playback server for Pi 4
@@ -206,7 +206,7 @@ mkdir -p ~/audio
 cd ~/audio
 # Scarica tutti i file da Home Assistant (sostituisci con le tue frasi)
 for f in condizionatore_acceso condizionatore_spento cancello_aperto; do
-  curl -s "http://192.168.1.114:8123/local/${f}.wav" -o "${f}.wav"
+  curl -s "http://TUO IP:8123/local/${f}.wav" -o "${f}.wav"
 done
 ```
 
@@ -215,7 +215,7 @@ Aggiungi in `configuration.yaml`:
 ```yaml
 rest_command:
   play_audio_pi4:
-    url: "http://192.168.1.139:8080/play"
+    url: "http://TUO IP:8080/play"
     method: POST
     headers:
       Content-Type: "application/json"
@@ -251,7 +251,7 @@ Per frasi fisse (condizionatore, cancello, ecc.), puoi pre-generarle una volta e
 
 Per riprodurre su Pi 4 (uscita audio diretta):
 4. Copia il file anche in `~/audio/` sul Pi 4
-5. Chiama `http://192.168.1.139:8080/play?file=condizionatore_acceso.wav`
+5. Chiama `http://TUO IP:8080/play?file=condizionatore_acceso.wav`
 
 **Automazioni incluse:** il repository include 11 automazioni e 25 script pronti per riprodurre i file audio pre-generati su Pi 4. Basta copiare i contenuti di `automations.yaml` e `scripts.yaml` (o aggiungerli ai propri file esistenti) e riavviare Home Assistant.
 
