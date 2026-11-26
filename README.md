@@ -170,7 +170,90 @@ Argomenti utili di `server/qwen3_tts_server.py`:
 
 > 🔒 Il server non ha autenticazione: usalo solo nella tua rete locale e non esporlo su internet.
 
-### 2b. Alternativa: modello dentro Home Assistant (solo HA Core)
+### 2c. Riproduzione audio su Raspberry Pi 4 (opzionale)
+
+Se il Raspberry Pi 4 ha casse collegate all'uscita audio (jack 3.5 mm), può riprodurre direttamente i file audio pre-generati senza passare per VLC o altri media player.
+
+**Installazione:**
+```bash
+# Sul Pi 4
+sudo apt install -y mpv alsa-utils
+# Il file audio_player.py è già nel repository (server/audio_player.py)
+sudo cp ~/HA_Qwen3_TTS/server/audio_player.py /home/casasantino/audio_player.py
+sudo tee /etc/systemd/system/audio-player.service > /dev/null <<'EOF'
+[Unit]
+Description=Audio playback server for Pi 4
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=casasantino
+ExecStart=/home/casasantino/qwen3-tts/.venv/bin/python -u /home/casasantino/audio_player.py --host 0.0.0.0 --port 8080 --audio-dir /home/casasantino/audio
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable --now audio-player
+```
+
+**Scarica i file audio su Pi 4:**
+```bash
+mkdir -p ~/audio
+cd ~/audio
+# Scarica tutti i file da Home Assistant (sostituisci con le tue frasi)
+for f in condizionatore_acceso condizionatore_spento cancello_aperto; do
+  curl -s "http://192.168.1.114:8123/local/${f}.wav" -o "${f}.wav"
+done
+```
+
+**Configurazione Home Assistant:**
+Aggiungi in `configuration.yaml`:
+```yaml
+rest_command:
+  play_audio_pi4:
+    url: "http://192.168.1.139:8080/play"
+    method: POST
+    headers:
+      Content-Type: "application/json"
+    payload: '{"file": "{{ file }}"}'
+```
+
+Poi usa nelle automazioni:
+```yaml
+action:
+  - service: rest_command.play_audio_pi4
+    data:
+      file: "condizionatore_acceso.wav"
+```
+
+Oppure crea script in `scripts.yaml` per riproduzione manuale:
+```yaml
+play_pi4_condizionatore_acceso:
+  alias: "Riproduci - Condizionatore acceso"
+  sequence:
+    - service: rest_command.play_audio_pi4
+      data:
+        file: "condizionatore_acceso.wav"
+```
+
+### 2d. File audio pre-generati (opzionale)
+
+Per frasi fisse (condizionatore, cancello, ecc.), puoi pre-generarle una volta e salvarle in `/config/www/` di Home Assistant. Questo evita la sintesi TTS (che richiede ~2,5 min per frase su Pi 4) e permette riproduzione istantanea.
+
+**Procedura:**
+1. Sintetizza la frase sul server Pi 4: `python tools/test_server.py --text "Condizionatore acceso" --out /tmp/condizionatore_acceso.wav`
+2. Copia il file in `/config/www/` di Home Assistant (via Samba o SSH)
+3. Il file è accessibile a `http://homeassistant.local:8123/local/condizionatore_acceso.wav`
+
+Per riprodurre su Pi 4 (uscita audio diretta):
+4. Copia il file anche in `~/audio/` sul Pi 4
+5. Chiama `http://192.168.1.139:8080/play?file=condizionatore_acceso.wav`
+
+**Automazioni incluse:** il repository include 11 automazioni e 25 script pronti per riprodurre i file audio pre-generati su Pi 4. Basta copiare i contenuti di `automations.yaml` e `scripts.yaml` (o aggiungerli ai propri file esistenti) e riavviare Home Assistant.
 
 Se il tuo Home Assistant può installare pacchetti Python (HA Core in venv, non HA OS/Container):
 
@@ -280,6 +363,7 @@ HA_Qwen3_TTS/
 │       ├── tts.py              # Piattaforma TTS (client del server o motore locale)
 │       └── translations/       # 10 lingue
 ├── server/                     # Server standalone per la modalità di rete
+│   ├── audio_player.py         # Server di riproduzione audio su Pi 4 (porta 8080)
 │   ├── Dockerfile
 │   ├── docker-compose.yml
 │   ├── qwen3_tts_server.py     # API HTTP: /health e /synthesize
