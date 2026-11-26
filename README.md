@@ -188,8 +188,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=casasantino
-ExecStart=/home/casasantino/qwen3-tts/.venv/bin/python -u /home/casasantino/audio_player.py --host 0.0.0.0 --port 8080 --audio-dir /home/casasantino/audio
+User=User
+ExecStart=/home/User/qwen3-tts/.venv/bin/python -u /home/User/audio_player.py --host 0.0.0.0 --port 8080 --audio-dir /home/User/audio
 Restart=on-failure
 RestartSec=5
 
