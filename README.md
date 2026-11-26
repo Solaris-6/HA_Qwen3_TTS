@@ -47,7 +47,7 @@ Installazione manuale alternativa: copia la cartella `custom_components/qwen3_tt
 
 ### 2a. Avvia il server Qwen3-TTS (consigliato)
 
-#### La tua rete (Home Assistant su Raspberry Pi 5 a `192.168.1.114`, server su Raspberry Pi 4 a `192.168.1.139`)
+#### La tua rete (Home Assistant su Raspberry Pi 5 a `tuo IP`, server su Raspberry Pi 4+ a `tuo IP`)
 
 Il modello (`Qwen3-TTS-12Hz-0.6B-Base`) gira interamente sul **Raspberry Pi 4**: Home Assistant (sul Pi 5) non installa nulla di pesante e si limita a inviare il testo. Il Pi 4 deve avere **almeno 4 GB di RAM** (8 GB consigliati); con 4 GB aggiungi una swap di 2 GB per non avere interruzioni.
 
@@ -113,17 +113,17 @@ journalctl -u qwen3-tts -f   # log in tempo reale
 Verifica dal Pi 5 (o da qualsiasi PC della rete):
 
 ```bash
-python tools/test_server.py --url http://192.168.1.139:8000
+python tools/test_server.py --url http://tuo IP:8000
 ```
 
 > ⚠️ Il Pi 4 è **solo CPU**: ogni frase di 10 parole richiede circa 60–180 s. Il caricamento del modello all'avvio richiede circa 60 s (anticipato da `--preload`).
 
 #### Installazione generica (PC / NAS / Mini PC)
 
-Sul computer che ospiterà il modello (es. `192.168.1.139`):"oldString">
+Sul computer che ospiterà il modello (es. `tuo IP`):"oldString">
 ### 2a. Avvia il server Qwen3-TTS (consigliato)
 
-Sul computer che ospiterà il modello (es. `192.168.1.139`):
+Sul computer che ospiterà il modello (es. `tuo IP`):
 
 ```bash
 git clone https://github.com/Solaris-6/HA_Qwen3_TTS
@@ -154,7 +154,7 @@ docker compose up -d --build
 Verifica che il server risponda:
 
 ```bash
-python tools/test_server.py --url http://192.168.1.139:8000
+python tools/test_server.py --url http://tuo IP:8000
 ```
 
 Argomenti utili di `server/qwen3_tts_server.py`:
@@ -265,7 +265,7 @@ Se il tuo Home Assistant può installare pacchetti Python (HA Core in venv, non 
 
 **Impostazioni → Dispositivi e servizi → Aggiungi integrazione → Qwen3 TTS**
 
-- **Primo passo**: inserisci l'indirizzo del server, ad esempio `http://192.168.1.139:8000`. Lascia il campo **vuoto** per la modalità locale. L'integrazione verifica subito che il server risponda.
+- **Primo passo**: inserisci l'indirizzo del server, ad esempio `http://tuo IP:8000`. Lascia il campo **vuoto** per la modalità locale. L'integrazione verifica subito che il server risponda.
 - **Secondo passo**:
 
 | Opzione | Descrizione | Predefinito |
@@ -311,7 +311,7 @@ python tools/test_audio.py tone
 python tools/test_audio.py synth "Ciao, questa è una prova di sintesi." --model /percorso/del/modello
 
 # 4) Verifica il server (solo standard library)
-python tools/test_server.py --url http://192.168.1.139:8000
+python tools/test_server.py --url http://tuo IP:8000
 
 # 5) Valida un file WAV qualsiasi
 python tools/test_audio.py check tools/output/test_tone.wav
